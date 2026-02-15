@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: read
     outputs:
       should-test: ${{ steps.filter.outputs.should-test }}
     steps:
@@ -40,6 +42,8 @@ jobs:
     if: ${{ (github.event_name == 'pull_request' && needs.paths-filter.outputs.should-test == 'true') || github.event_name == 'push'}}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     env:
       PROJECT_VERSION_PATH: Samples~/ProjectSettings/ProjectVersion.txt
     outputs:
