@@ -85,3 +85,7 @@ crashlytics-build.properties
 
 **/*.sln
 **/*.sln.meta
+
+# Root meta files
+/LICENSE.txt.meta
+/README.md.meta
