@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   pull_request:
 
 permissions:
@@ -14,11 +15,11 @@ jobs:
   paths-filter:
     name: Paths Filter
     if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       action: ${{ steps.filter.outputs.action }}
     steps:
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
         id: filter
         with:
           filters: |
@@ -29,11 +30,11 @@ jobs:
     name: Action
     needs: paths-filter
     if: ${{ needs.paths-filter.outputs.action == 'true' || github.event_name == 'push'}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v5
-      - uses: reviewdog/action-actionlint@v1
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: reviewdog/action-actionlint@e58ee9d111489c31395fbe4857b0be6e7635dbda
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
-          fail_on_error: true
+          fail_level: error
