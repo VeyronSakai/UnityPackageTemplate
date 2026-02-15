@@ -30,7 +30,7 @@ jobs:
     name: Action
     needs: paths-filter
     if: ${{ needs.paths-filter.outputs.action == 'true' || github.event_name == 'push'}}
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - uses: reviewdog/action-actionlint@e58ee9d111489c31395fbe4857b0be6e7635dbda
