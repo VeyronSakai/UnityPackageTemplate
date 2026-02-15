@@ -26,7 +26,7 @@ jobs:
     outputs:
       package_json: ${{ steps.filter.outputs.package_json }}
     steps:
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
         id: filter
         with:
           filters: |
@@ -43,7 +43,7 @@ jobs:
     outputs:
       tag_name: ${{ steps.release-drafter.outputs.tag_name }}
     steps:
-      - uses: release-drafter/release-drafter@v6
+      - uses: release-drafter/release-drafter@6db134d15f3909ccc9eefd369f02bd1e9cffdf97 # v6
         id: release-drafter
         with:
           commitish: main
@@ -60,14 +60,14 @@ jobs:
       VERSION: ${{ needs.update-draft.outputs.tag_name }}
       SOURCE_BRANCH: github-actions/update-files/${{ github.run_number }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - name: Update package.json
         run: |
           json_content=$(cat "${PACKAGE_JSON_PATH}")
           updated_json=$(echo "${json_content}" | jq --arg version "${VERSION}" '.version = $version')
           echo "${updated_json}" | jq '.' > "${PACKAGE_JSON_PATH}"
       - name: Commit package.json
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
         id: commit-package-json
         with:
           author_name: ${{ env.GITHUB_BOT_NAME }}
@@ -75,7 +75,7 @@ jobs:
           message: "Update package.json"
           add: ${{ env.PACKAGE_JSON_PATH }}
           new_branch: ${{ env.SOURCE_BRANCH }}
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
         id: create-github-app-token
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -100,7 +100,7 @@ jobs:
     env:
       VERSION: ${{ needs.update-draft.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           ref: main
       - name: Validate version in package.json
@@ -110,7 +110,7 @@ jobs:
             echo "::error::version in package.json (${package_version}) does not match the release draft tag (${VERSION})"
             exit 1
           fi
-      - uses: release-drafter/release-drafter@v6
+      - uses: release-drafter/release-drafter@6db134d15f3909ccc9eefd369f02bd1e9cffdf97 # v6
         id: release-drafter
         with:
           publish: true
@@ -124,7 +124,7 @@ jobs:
             echo "minor=${major}.${minor}"
             echo "patch=${major}.${minor}.${patch}"
           } >> "${GITHUB_OUTPUT}"
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           ref: ${{ env.VERSION }}
       - name: Update major tag
