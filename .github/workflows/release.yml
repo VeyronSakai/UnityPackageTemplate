@@ -152,9 +152,9 @@ jobs:
         env:
           MAJOR: ${{ steps.get-semver.outputs.major }}
         run: |
-          git push -f origin ("refs/tags/{0}:refs/tags/{1}" -f $env:VERSION, $env:MAJOR)
+          git push -f origin "refs/tags/${env:VERSION}:refs/tags/${env:MAJOR}"
       - name: Update minor tag
         env:
           MINOR: ${{ steps.get-semver.outputs.minor }}
         run: |
-          git push -f origin ("refs/tags/{0}:refs/tags/{1}" -f $env:VERSION, $env:MINOR)
+          git push -f origin "refs/tags/${env:VERSION}:refs/tags/${env:MINOR}"
