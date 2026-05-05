@@ -1,7 +1,7 @@
 {
   "name": "com.your-company.package-name",
   "displayName": "Package Name",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Description of your Unity package.",
   "author": {
     "name": "Your Name"
