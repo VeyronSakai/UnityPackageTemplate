@@ -67,9 +67,9 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Update package.json
         run: |
-          $jsonContent = Get-Content -Raw -Path $env:PACKAGE_JSON_PATH
-          $updatedJson = $jsonContent | jq --arg version $env:VERSION '.version = $version' | jq '.'
-          $updatedJson | Set-Content -Path $env:PACKAGE_JSON_PATH
+          $packageJson = Get-Content -Raw -Path $env:PACKAGE_JSON_PATH | ConvertFrom-Json
+          $packageJson.version = $env:VERSION
+          $packageJson | ConvertTo-Json -Depth 100 | Set-Content -Path $env:PACKAGE_JSON_PATH
       - name: Commit package.json
         uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
         id: commit-package-json
@@ -121,7 +121,8 @@ jobs:
           ref: main
       - name: Validate version in package.json
         run: |
-          $packageVersion = jq -r '.version' $env:PACKAGE_JSON_PATH
+          $packageJson = Get-Content -Raw -Path $env:PACKAGE_JSON_PATH | ConvertFrom-Json
+          $packageVersion = $packageJson.version
           if ($packageVersion -ne $env:VERSION) {
             Write-Output "::error::version in package.json ($packageVersion) does not match the release draft tag ($env:VERSION)"
             exit 1
