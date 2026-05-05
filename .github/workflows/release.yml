@@ -12,6 +12,10 @@ permissions:
   contents: write
   pull-requests: write
 
+defaults:
+  run:
+    shell: pwsh
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   PACKAGE_JSON_PATH: package.json
@@ -63,9 +67,9 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Update package.json
         run: |
-          json_content=$(cat "${PACKAGE_JSON_PATH}")
-          updated_json=$(echo "${json_content}" | jq --arg version "${VERSION}" '.version = $version')
-          echo "${updated_json}" | jq '.' > "${PACKAGE_JSON_PATH}"
+          $jsonContent = Get-Content -Raw -Path $env:PACKAGE_JSON_PATH
+          $updatedJson = $jsonContent | jq --arg version $env:VERSION '.version = $version' | jq '.'
+          $updatedJson | Set-Content -Path $env:PACKAGE_JSON_PATH
       - name: Commit package.json
         uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
         id: commit-package-json
@@ -77,7 +81,7 @@ jobs:
           new_branch: ${{ env.SOURCE_BRANCH }}
       - name: Update README.md
         run: |
-          cp -f .github/DRAFT_README.md README.md
+          Copy-Item -Path .github/DRAFT_README.md -Destination README.md -Force
       - name: Commit README.md
         uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
         id: commit-readme
@@ -97,8 +101,8 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.create-github-app-token.outputs.token }}
         run: |
-          gh pr create --title "Update files for release" --body "Update files for release" --base main --head "${SOURCE_BRANCH}"
-          gh pr merge "${SOURCE_BRANCH}" --auto --merge
+          gh pr create --title "Update files for release" --body "Update files for release" --base main --head $env:SOURCE_BRANCH
+          gh pr merge $env:SOURCE_BRANCH --auto --merge
 
   release:
     name: Release
@@ -117,11 +121,11 @@ jobs:
           ref: main
       - name: Validate version in package.json
         run: |
-          package_version=$(jq -r '.version' "${PACKAGE_JSON_PATH}")
-          if [[ "${package_version}" != "${VERSION}" ]]; then
-            echo "::error::version in package.json (${package_version}) does not match the release draft tag (${VERSION})"
+          $packageVersion = jq -r '.version' $env:PACKAGE_JSON_PATH
+          if ($packageVersion -ne $env:VERSION) {
+            Write-Output "::error::version in package.json ($packageVersion) does not match the release draft tag ($env:VERSION)"
             exit 1
-          fi
+          }
       - uses: release-drafter/release-drafter@563bf132657a13ded0b01fcb723c5a58cdd824e2 # v7.2.1
         id: release-drafter
         with:
@@ -130,19 +134,27 @@ jobs:
       - name: Get semver
         id: get-semver
         run: |
-          read -r major minor patch <<< "$(echo "${VERSION}" | grep -oE '^([0-9]+)\.([0-9]+)\.([0-9]+)' | awk -F '.' '{print $1 " " $2 " " $3}')"
-          {
-            echo "major=${major}"
-            echo "minor=${major}.${minor}"
-            echo "patch=${major}.${minor}.${patch}"
-          } >> "${GITHUB_OUTPUT}"
+          $semver = [regex]::Match($env:VERSION, '^([0-9]+)\.([0-9]+)\.([0-9]+)')
+          $major = $semver.Groups[1].Value
+          $minor = $semver.Groups[2].Value
+          $patch = $semver.Groups[3].Value
+
+          @(
+            "major=$major"
+            ("minor={0}.{1}" -f $major, $minor)
+            ("patch={0}.{1}.{2}" -f $major, $minor, $patch)
+          ) | Add-Content -Path $env:GITHUB_OUTPUT
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ env.VERSION }}
       - name: Update major tag
         if: steps.get-semver.outputs.major != '0'
+        env:
+          MAJOR: ${{ steps.get-semver.outputs.major }}
         run: |
-          git push -f origin "refs/tags/${{ env.VERSION }}:refs/tags/${{ steps.get-semver.outputs.major }}"
+          git push -f origin ("refs/tags/{0}:refs/tags/{1}" -f $env:VERSION, $env:MAJOR)
       - name: Update minor tag
+        env:
+          MINOR: ${{ steps.get-semver.outputs.minor }}
         run: |
-          git push -f origin "refs/tags/${{ env.VERSION }}:refs/tags/${{ steps.get-semver.outputs.minor }}"
+          git push -f origin ("refs/tags/{0}:refs/tags/{1}" -f $env:VERSION, $env:MINOR)
