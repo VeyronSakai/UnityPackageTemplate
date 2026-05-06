@@ -25,3 +25,5 @@
 # Root meta files
 /LICENSE.txt.meta
 /README.md.meta
+
+.codex/config.toml
