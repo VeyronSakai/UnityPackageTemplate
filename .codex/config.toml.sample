@@ -1,0 +1,7 @@
+[mcp_servers.unity]
+command = "bash"
+args = ["-c", "dotnet run --project ${UNICORTEX_PROJECT_PATH}/Library/PackageCache/com.veyron-sakai.uni-cortex@*/Tools~/UniCortex.Mcp/"]
+cwd = "/absolute/path/to/UnityPackageTemplate/Samples~"
+
+[mcp_servers.unity.env]
+UNICORTEX_PROJECT_PATH = "/absolute/path/to/UnityPackageTemplate/Samples~"

@@ -135,6 +135,13 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.veyron-sakai.uni-cortex": {
+      "version": "https://github.com/VeyronSakai/UniCortex.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c56fd5ec283f2cbb7a254d1db0288397859541f2"
+    },
     "com.your-company.package-name": {
       "version": "file:../../",
       "depth": 0,
